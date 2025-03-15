@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactif</title>
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+    <div class="container" id="menu">
+        <h1>Bienvenue dans le Quiz</h1>
+        <button onclick="showCreateQuiz()">Créer un Quiz</button>
+        <button onclick="showPlayQuiz()">Jouer</button>
+        <button onclick="showResetOptions()">Réinitialiser</button>
+    </div>
+
+    <div class="container hidden" id="createQuiz">
+        <h2>Créer une question</h2>
+        <input type="text" id="question" placeholder="Entrez votre question">
+        <input type="text" id="answer" placeholder="Entrez la réponse">
+        <select id="category"></select>
+        <button onclick="addQuestion()">Ajouter</button>
+        <button onclick="showMenu()">Retour</button>
+    </div>
+
+    <div class="container hidden" id="playQuiz">
+        <h2>Choisir une catégorie</h2>
+        <select id="categorySelect"></select>
+        <button onclick="startQuiz()">Commencer</button>
+        <button onclick="showMenu()">Retour</button>
+    </div>
+
+    <div class="container hidden" id="quiz">
+        <h2 id="questionDisplay"></h2>
+        <input type="text" id="userAnswer" placeholder="Votre réponse">
+        <button onclick="checkAnswer()">Valider</button>
+    </div>
+
+    <div class="container hidden" id="resetOptions">
+        <h2>Réinitialisation</h2>
+        <select id="resetCategorySelect"></select>
+        <button onclick="resetCategory()">Réinitialiser cette catégorie</button>
+        <button onclick="resetQuiz()">Réinitialiser tout</button>
+        <button onclick="showMenu()">Retour</button>
+    </div>
+
+    <script src="script2.js"></script>
+</body>
+</html>
