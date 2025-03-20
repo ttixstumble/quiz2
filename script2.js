@@ -1,115 +1,138 @@
-document.addEventListener("DOMContentLoaded", function() {
+let currentUser = null;
+let usersData = JSON.parse(localStorage.getItem("usersData")) || {};
+
+function registerUser() {
+    let username = document.getElementById("username").value.trim();
+    if (!username) return alert("Veuillez entrer un nom d'utilisateur.");
+    if (usersData[username]) return alert("Ce nom d'utilisateur est déjà pris.");
+
+    usersData[username] = { categories: {}, quizzes: {} };
+    localStorage.setItem("usersData", JSON.stringify(usersData));
+    loginUser();
+}
+
+function loginUser() {
+    let username = document.getElementById("username").value.trim();
+    if (!usersData[username]) return alert("Utilisateur non trouvé. Veuillez vous inscrire.");
+
+    currentUser = username;
+    document.getElementById("auth").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
     loadCategories();
-});
+}
 
-let quizData = JSON.parse(localStorage.getItem("quizData")) || {};
+function logoutUser() {
+    currentUser = null;
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("auth").classList.remove("hidden");
+}
 
-function showMenu() {
-    document.querySelectorAll(".hidden").forEach(el => el.style.display = "none");
-    document.getElementById("menu").style.display = "block";
+function showCreateCategory() {
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("createCategory").classList.remove("hidden");
+}
+
+function addCategory() {
+    let category = document.getElementById("newCategory").value.trim();
+    if (!category) return alert("Veuillez entrer un nom de catégorie.");
+    
+    if (!usersData[currentUser].categories[category]) {
+        usersData[currentUser].categories[category] = [];
+        localStorage.setItem("usersData", JSON.stringify(usersData));
+        loadCategories();
+    }
+    showMenu();
 }
 
 function showCreateQuiz() {
-    document.querySelectorAll(".hidden").forEach(el => el.style.display = "none");
-    document.getElementById("createQuiz").style.display = "block";
-    updateCategoryDropdown("category");
-}
-
-function showPlayQuiz() {
-    document.querySelectorAll(".hidden").forEach(el => el.style.display = "none");
-    document.getElementById("playQuiz").style.display = "block";
-    updateCategoryDropdown("categorySelect");
-}
-
-function showResetOptions() {
-    document.querySelectorAll(".hidden").forEach(el => el.style.display = "none");
-    document.getElementById("resetOptions").style.display = "block";
-    updateCategoryDropdown("resetCategorySelect");
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("createQuiz").classList.remove("hidden");
 }
 
 function addQuestion() {
     let question = document.getElementById("question").value.trim();
     let answer = document.getElementById("answer").value.trim();
-    let category = document.getElementById("category").value.trim();
+    let category = document.getElementById("category").value;
 
-    if (question && answer && category) {
-        if (!quizData[category]) quizData[category] = [];
-        quizData[category].push({ question, answer });
-        localStorage.setItem("quizData", JSON.stringify(quizData));
-        alert("Question ajoutée !");
-        document.getElementById("question").value = "";
-        document.getElementById("answer").value = "";
-    } else {
-        alert("Veuillez remplir tous les champs");
+    if (!question || !answer || !category) return alert("Veuillez remplir tous les champs.");
+    
+    usersData[currentUser].categories[category].push({ question, answer });
+    localStorage.setItem("usersData", JSON.stringify(usersData));
+    showMenu();
+}
+
+function loadCategories() {
+    let categorySelects = document.querySelectorAll("#category, #categorySelect, #resetCategorySelect");
+    categorySelects.forEach(select => select.innerHTML = "");
+    
+    for (let category in usersData[currentUser].categories) {
+        let option = new Option(category, category);
+        categorySelects.forEach(select => select.add(option.cloneNode(true)));
     }
 }
 
-function updateCategoryDropdown(selectId) {
-    let select = document.getElementById(selectId);
-    select.innerHTML = "";
-    Object.keys(quizData).forEach(cat => {
-        let option = document.createElement("option");
-        option.value = cat;
-        option.textContent = cat;
-        select.appendChild(option);
-    });
+function showPlayQuiz() {
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("playQuiz").classList.remove("hidden");
 }
 
 function startQuiz() {
     let category = document.getElementById("categorySelect").value;
-    if (!quizData[category] || quizData[category].length === 0) {
-        alert("Aucune question dans cette catégorie");
-        return;
-    }
-    sessionStorage.setItem("currentCategory", category);
-    sessionStorage.setItem("currentQuestion", 0);
-    sessionStorage.setItem("score", 0);
-    showQuestion();
+    if (!category) return alert("Veuillez choisir une catégorie.");
+    
+    let questions = usersData[currentUser].categories[category];
+    if (!questions.length) return alert("Aucune question dans cette catégorie.");
+    
+    playQuiz(questions);
 }
 
-function showQuestion() {
-    let category = sessionStorage.getItem("currentCategory");
-    let index = parseInt(sessionStorage.getItem("currentQuestion"));
-    let questions = quizData[category];
-
-    if (index < questions.length) {
-        document.querySelectorAll(".hidden").forEach(el => el.style.display = "none");
-        document.getElementById("quiz").style.display = "block";
-        document.getElementById("questionDisplay").textContent = questions[index].question;
-    } else {
-        alert(`Quiz terminé ! Score : ${sessionStorage.getItem("score")}/${questions.length}`);
-        showMenu();
+function playQuiz(questions) {
+    let index = 0;
+    let score = 0;
+    document.getElementById("playQuiz").classList.add("hidden");
+    document.getElementById("quiz").classList.remove("hidden");
+    
+    function askQuestion() {
+        if (index < questions.length) {
+            document.getElementById("questionDisplay").innerText = questions[index].question;
+        } else {
+            alert(`Quiz terminé ! Score : ${score}/${questions.length}`);
+            showMenu();
+        }
     }
+
+    function checkAnswer() {
+        let userAnswer = document.getElementById("userAnswer").value.trim().toLowerCase();
+        if (userAnswer === questions[index].answer.toLowerCase()) score++;
+        index++;
+        askQuestion();
+    }
+    
+    window.checkAnswer = checkAnswer;
+    askQuestion();
 }
 
-function checkAnswer() {
-    let category = sessionStorage.getItem("currentCategory");
-    let index = parseInt(sessionStorage.getItem("currentQuestion"));
-    let questions = quizData[category];
-    let userAnswer = document.getElementById("userAnswer").value.trim().toLowerCase();
-    let correctAnswer = questions[index].answer.toLowerCase();
-
-    if (userAnswer === correctAnswer) {
-        let score = parseInt(sessionStorage.getItem("score")) + 1;
-        sessionStorage.setItem("score", score);
-        sessionStorage.setItem("currentQuestion", index + 1);
-        showQuestion();
-    } else {
-        alert("Mauvaise réponse, réessayez !");
-    }
+function showResetOptions() {
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("resetOptions").classList.remove("hidden");
 }
 
 function resetCategory() {
     let category = document.getElementById("resetCategorySelect").value;
-    delete quizData[category];
-    localStorage.setItem("quizData", JSON.stringify(quizData));
-    alert("Catégorie réinitialisée");
-    updateCategoryDropdown("resetCategorySelect");
+    if (category) {
+        usersData[currentUser].categories[category] = [];
+        localStorage.setItem("usersData", JSON.stringify(usersData));
+    }
+    showMenu();
 }
 
 function resetQuiz() {
-    localStorage.removeItem("quizData");
-    quizData = {};
-    alert("Quiz entièrement réinitialisé");
-    updateCategoryDropdown("resetCategorySelect");
+    usersData[currentUser].categories = {};
+    localStorage.setItem("usersData", JSON.stringify(usersData));
+    showMenu();
+}
+
+function showMenu() {
+    document.querySelectorAll(".container").forEach(div => div.classList.add("hidden"));
+    document.getElementById("menu").classList.remove("hidden");
 }
