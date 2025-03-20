@@ -11,6 +11,7 @@ function register() {
         users[username] = { quizzes: {}, categories: [] };
         localStorage.setItem("users", JSON.stringify(users));
         alert("Inscription réussie !");
+        loginUser(username);
     } else {
         alert("Nom d'utilisateur déjà pris ou invalide.");
     }
@@ -19,16 +20,20 @@ function register() {
 function login() {
     let username = document.getElementById("username").value;
     if (users[username]) {
-        currentUser = username;
-        localStorage.setItem("currentUser", username);
-        checkUserSession();
+        loginUser(username);
     } else {
         alert("Utilisateur non trouvé.");
     }
 }
 
+function loginUser(username) {
+    currentUser = username;
+    localStorage.setItem("currentUser", username);
+    checkUserSession();
+}
+
 function checkUserSession() {
-    if (currentUser) {
+    if (currentUser && users[currentUser]) {
         document.getElementById("auth-section").style.display = "none";
         document.getElementById("quiz-section").style.display = "block";
         document.getElementById("user-display").textContent = currentUser;
@@ -41,7 +46,7 @@ function createCategory() {
     if (categoryName && !users[currentUser].categories.includes(categoryName)) {
         users[currentUser].categories.push(categoryName);
         users[currentUser].quizzes[categoryName] = [];
-        localStorage.setItem("users", JSON.stringify(users));
+        saveUserData();
         alert("Catégorie créée !");
         loadCategories();
     } else {
@@ -75,7 +80,7 @@ function addQuestion() {
 
     if (question && answer && category) {
         users[currentUser].quizzes[category].push({ question, answer });
-        localStorage.setItem("users", JSON.stringify(users));
+        saveUserData();
         alert("Question ajoutée !");
     } else {
         alert("Veuillez remplir tous les champs.");
@@ -105,23 +110,18 @@ function startQuiz() {
 function resetAllQuizzes() {
     users[currentUser].quizzes = {};
     users[currentUser].categories = [];
-    localStorage.setItem("users", JSON.stringify(users));
+    saveUserData();
     alert("Tous les quiz ont été réinitialisés !");
     loadCategories();
 }
 
-function showQuizCreation() {
-    document.getElementById("quiz-section").style.display = "none";
-    document.getElementById("quiz-creation-section").style.display = "block";
+function saveUserData() {
+    localStorage.setItem("users", JSON.stringify(users));
 }
 
-function showPlayQuiz() {
+function logout() {
+    currentUser = null;
+    localStorage.removeItem("currentUser");
+    document.getElementById("auth-section").style.display = "block";
     document.getElementById("quiz-section").style.display = "none";
-    document.getElementById("play-quiz-section").style.display = "block";
-}
-
-function backToMenu() {
-    document.getElementById("quiz-creation-section").style.display = "none";
-    document.getElementById("play-quiz-section").style.display = "none";
-    document.getElementById("quiz-section").style.display = "block";
 }
