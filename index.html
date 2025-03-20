@@ -7,11 +7,27 @@
     <link rel="stylesheet" href="style2.css">
 </head>
 <body>
-    <div class="container" id="menu">
+    <div class="container" id="auth">
+        <h1>Connexion / Inscription</h1>
+        <input type="text" id="username" placeholder="Nom d'utilisateur">
+        <button onclick="registerUser()">Créer un compte</button>
+        <button onclick="loginUser()">Se connecter</button>
+    </div>
+
+    <div class="container hidden" id="menu">
         <h1>Bienvenue dans le Quiz</h1>
+        <button onclick="showCreateCategory()">Créer une Catégorie</button>
         <button onclick="showCreateQuiz()">Créer un Quiz</button>
         <button onclick="showPlayQuiz()">Jouer</button>
         <button onclick="showResetOptions()">Réinitialiser</button>
+        <button onclick="logoutUser()">Déconnexion</button>
+    </div>
+
+    <div class="container hidden" id="createCategory">
+        <h2>Créer une catégorie</h2>
+        <input type="text" id="newCategory" placeholder="Nom de la catégorie">
+        <button onclick="addCategory()">Ajouter</button>
+        <button onclick="showMenu()">Retour</button>
     </div>
 
     <div class="container hidden" id="createQuiz">
