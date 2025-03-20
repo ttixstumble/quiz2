@@ -1,138 +1,127 @@
-let currentUser = null;
-let usersData = JSON.parse(localStorage.getItem("usersData")) || {};
+document.addEventListener("DOMContentLoaded", function() {
+    checkUserSession();
+});
 
-function registerUser() {
-    let username = document.getElementById("username").value.trim();
-    if (!username) return alert("Veuillez entrer un nom d'utilisateur.");
-    if (usersData[username]) return alert("Ce nom d'utilisateur est déjà pris.");
+let users = JSON.parse(localStorage.getItem("users")) || {};
+let currentUser = localStorage.getItem("currentUser");
 
-    usersData[username] = { categories: {}, quizzes: {} };
-    localStorage.setItem("usersData", JSON.stringify(usersData));
-    loginUser();
+function register() {
+    let username = document.getElementById("username").value;
+    if (username && !users[username]) {
+        users[username] = { quizzes: {}, categories: [] };
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Inscription réussie !");
+    } else {
+        alert("Nom d'utilisateur déjà pris ou invalide.");
+    }
 }
 
-function loginUser() {
-    let username = document.getElementById("username").value.trim();
-    if (!usersData[username]) return alert("Utilisateur non trouvé. Veuillez vous inscrire.");
-
-    currentUser = username;
-    document.getElementById("auth").classList.add("hidden");
-    document.getElementById("menu").classList.remove("hidden");
-    loadCategories();
+function login() {
+    let username = document.getElementById("username").value;
+    if (users[username]) {
+        currentUser = username;
+        localStorage.setItem("currentUser", username);
+        checkUserSession();
+    } else {
+        alert("Utilisateur non trouvé.");
+    }
 }
 
-function logoutUser() {
-    currentUser = null;
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("auth").classList.remove("hidden");
-}
-
-function showCreateCategory() {
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("createCategory").classList.remove("hidden");
-}
-
-function addCategory() {
-    let category = document.getElementById("newCategory").value.trim();
-    if (!category) return alert("Veuillez entrer un nom de catégorie.");
-    
-    if (!usersData[currentUser].categories[category]) {
-        usersData[currentUser].categories[category] = [];
-        localStorage.setItem("usersData", JSON.stringify(usersData));
+function checkUserSession() {
+    if (currentUser) {
+        document.getElementById("auth-section").style.display = "none";
+        document.getElementById("quiz-section").style.display = "block";
+        document.getElementById("user-display").textContent = currentUser;
         loadCategories();
     }
-    showMenu();
 }
 
-function showCreateQuiz() {
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("createQuiz").classList.remove("hidden");
-}
-
-function addQuestion() {
-    let question = document.getElementById("question").value.trim();
-    let answer = document.getElementById("answer").value.trim();
-    let category = document.getElementById("category").value;
-
-    if (!question || !answer || !category) return alert("Veuillez remplir tous les champs.");
-    
-    usersData[currentUser].categories[category].push({ question, answer });
-    localStorage.setItem("usersData", JSON.stringify(usersData));
-    showMenu();
+function createCategory() {
+    let categoryName = document.getElementById("category-name").value;
+    if (categoryName && !users[currentUser].categories.includes(categoryName)) {
+        users[currentUser].categories.push(categoryName);
+        users[currentUser].quizzes[categoryName] = [];
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Catégorie créée !");
+        loadCategories();
+    } else {
+        alert("Catégorie invalide ou existante.");
+    }
 }
 
 function loadCategories() {
-    let categorySelects = document.querySelectorAll("#category, #categorySelect, #resetCategorySelect");
-    categorySelects.forEach(select => select.innerHTML = "");
-    
-    for (let category in usersData[currentUser].categories) {
-        let option = new Option(category, category);
-        categorySelects.forEach(select => select.add(option.cloneNode(true)));
-    }
+    let categorySelect = document.getElementById("category-select");
+    let categoryPlaySelect = document.getElementById("category-play-select");
+    categorySelect.innerHTML = "";
+    categoryPlaySelect.innerHTML = "";
+
+    users[currentUser].categories.forEach(category => {
+        let option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+
+        let optionPlay = document.createElement("option");
+        optionPlay.value = category;
+        optionPlay.textContent = category;
+        categoryPlaySelect.appendChild(optionPlay);
+    });
 }
 
-function showPlayQuiz() {
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("playQuiz").classList.remove("hidden");
+function addQuestion() {
+    let category = document.getElementById("category-select").value;
+    let question = document.getElementById("question").value;
+    let answer = document.getElementById("answer").value;
+
+    if (question && answer && category) {
+        users[currentUser].quizzes[category].push({ question, answer });
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Question ajoutée !");
+    } else {
+        alert("Veuillez remplir tous les champs.");
+    }
 }
 
 function startQuiz() {
-    let category = document.getElementById("categorySelect").value;
-    if (!category) return alert("Veuillez choisir une catégorie.");
-    
-    let questions = usersData[currentUser].categories[category];
-    if (!questions.length) return alert("Aucune question dans cette catégorie.");
-    
-    playQuiz(questions);
-}
+    let category = document.getElementById("category-play-select").value;
+    let questions = users[currentUser].quizzes[category];
 
-function playQuiz(questions) {
-    let index = 0;
+    if (questions.length === 0) {
+        alert("Aucune question dans cette catégorie.");
+        return;
+    }
+
     let score = 0;
-    document.getElementById("playQuiz").classList.add("hidden");
-    document.getElementById("quiz").classList.remove("hidden");
-    
-    function askQuestion() {
-        if (index < questions.length) {
-            document.getElementById("questionDisplay").innerText = questions[index].question;
-        } else {
-            alert(`Quiz terminé ! Score : ${score}/${questions.length}`);
-            showMenu();
+    for (let i = 0; i < questions.length; i++) {
+        let userAnswer = prompt(questions[i].question);
+        if (userAnswer && userAnswer.toLowerCase() === questions[i].answer.toLowerCase()) {
+            score++;
         }
     }
 
-    function checkAnswer() {
-        let userAnswer = document.getElementById("userAnswer").value.trim().toLowerCase();
-        if (userAnswer === questions[index].answer.toLowerCase()) score++;
-        index++;
-        askQuestion();
-    }
-    
-    window.checkAnswer = checkAnswer;
-    askQuestion();
+    alert(`Quiz terminé ! Score : ${score}/${questions.length}`);
 }
 
-function showResetOptions() {
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("resetOptions").classList.remove("hidden");
+function resetAllQuizzes() {
+    users[currentUser].quizzes = {};
+    users[currentUser].categories = [];
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Tous les quiz ont été réinitialisés !");
+    loadCategories();
 }
 
-function resetCategory() {
-    let category = document.getElementById("resetCategorySelect").value;
-    if (category) {
-        usersData[currentUser].categories[category] = [];
-        localStorage.setItem("usersData", JSON.stringify(usersData));
-    }
-    showMenu();
+function showQuizCreation() {
+    document.getElementById("quiz-section").style.display = "none";
+    document.getElementById("quiz-creation-section").style.display = "block";
 }
 
-function resetQuiz() {
-    usersData[currentUser].categories = {};
-    localStorage.setItem("usersData", JSON.stringify(usersData));
-    showMenu();
+function showPlayQuiz() {
+    document.getElementById("quiz-section").style.display = "none";
+    document.getElementById("play-quiz-section").style.display = "block";
 }
 
-function showMenu() {
-    document.querySelectorAll(".container").forEach(div => div.classList.add("hidden"));
-    document.getElementById("menu").classList.remove("hidden");
+function backToMenu() {
+    document.getElementById("quiz-creation-section").style.display = "none";
+    document.getElementById("play-quiz-section").style.display = "none";
+    document.getElementById("quiz-section").style.display = "block";
 }
