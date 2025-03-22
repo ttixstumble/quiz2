@@ -7,44 +7,55 @@
     <link rel="stylesheet" href="style2.css">
 </head>
 <body>
-    <div class="container">
+    <div id="app">
         <h1>Quiz Interactif</h1>
+        <button id="btnCategorie">Catégorie</button>
+        <button id="btnQuiz">Quiz</button>
+        <button id="btnJouer">Jouer</button>
+        <button id="btnReinitialiser">Réinitialiser</button>
+        <button id="btnDeconnexion">Déconnexion</button>
+    </div>
 
-        <div id="auth-section">
-            <input type="text" id="username" placeholder="Nom d'utilisateur">
-            <button onclick="register()">S'inscrire</button>
-            <button onclick="login()">Se connecter</button>
+    <!-- Fenêtre modale pour ajouter une catégorie -->
+    <div id="modalCategorie" class="modal">
+        <div class="modal-content">
+            <h2>Ajouter une catégorie</h2>
+            <input type="text" id="nomCategorie" placeholder="Nom de la catégorie">
+            <button id="ajouterCategorie">Ajouter</button>
+            <button class="fermer">Fermer</button>
         </div>
+    </div>
 
-        <div id="quiz-section" style="display: none;">
-            <h2>Bienvenue, <span id="user-display"></span> !</h2>
-
-            <button onclick="logout()">Déconnexion</button>
-
-            <div id="category-section">
-                <input type="text" id="category-name" placeholder="Nom de la catégorie">
-                <button onclick="createCategory()">Créer Catégorie</button>
-            </div>
-
-            <button onclick="showQuizCreation()">Créer un Quiz</button>
-            <button onclick="showPlayQuiz()">Jouer</button>
-            <button onclick="resetAllQuizzes()">Réinitialiser Tout</button>
+    <!-- Fenêtre modale pour ajouter une question -->
+    <div id="modalQuiz" class="modal">
+        <div class="modal-content">
+            <h2>Ajouter une question</h2>
+            <select id="selectCategorie"></select>
+            <input type="text" id="question" placeholder="Question">
+            <input type="text" id="reponse" placeholder="Réponse">
+            <button id="ajouterQuestion">Ajouter</button>
+            <button class="fermer">Fermer</button>
         </div>
+    </div>
 
-        <div id="quiz-creation-section" style="display: none;">
-            <h2>Créer un Quiz</h2>
-            <select id="category-select"></select>
-            <input type="text" id="question" placeholder="Entrez la question">
-            <input type="text" id="answer" placeholder="Entrez la réponse">
-            <button onclick="addQuestion()">Ajouter Question</button>
-            <button onclick="backToMenu()">Retour</button>
+    <!-- Fenêtre modale pour jouer -->
+    <div id="modalJouer" class="modal">
+        <div class="modal-content">
+            <h2>Jouer</h2>
+            <select id="selectJouerCategorie"></select>
+            <button id="demarrerQuiz">Démarrer</button>
+            <button class="fermer">Fermer</button>
         </div>
+    </div>
 
-        <div id="play-quiz-section" style="display: none;">
-            <h2>Jouer au Quiz</h2>
-            <select id="category-play-select"></select>
-            <button onclick="startQuiz()">Commencer</button>
-            <button onclick="backToMenu()">Retour</button>
+    <!-- Fenêtre modale pour réinitialiser -->
+    <div id="modalReinitialiser" class="modal">
+        <div class="modal-content">
+            <h2>Réinitialiser</h2>
+            <button id="resetTout">Tout réinitialiser</button>
+            <select id="selectResetCategorie"></select>
+            <button id="resetCategorie">Réinitialiser la catégorie</button>
+            <button class="fermer">Fermer</button>
         </div>
     </div>
 
