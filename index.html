@@ -7,55 +7,25 @@
     <link rel="stylesheet" href="style2.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Quiz Interactif</h1>
-        <button id="btnCategorie">Catégorie</button>
-        <button id="btnQuiz">Quiz</button>
-        <button id="btnJouer">Jouer</button>
-        <button id="btnReinitialiser">Réinitialiser</button>
-        <button id="btnDeconnexion">Déconnexion</button>
+    <div id="login-container">
+        <h2>Connexion</h2>
+        <input type="text" id="username" placeholder="Nom d'utilisateur">
+        <button onclick="login()">Se connecter</button>
     </div>
 
-    <!-- Fenêtre modale pour ajouter une catégorie -->
-    <div id="modalCategorie" class="modal">
-        <div class="modal-content">
-            <h2>Ajouter une catégorie</h2>
-            <input type="text" id="nomCategorie" placeholder="Nom de la catégorie">
-            <button id="ajouterCategorie">Ajouter</button>
-            <button class="fermer">Fermer</button>
-        </div>
+    <div id="quiz-container" style="display:none;">
+        <h2 id="welcome-message"></h2>
+        <button onclick="openCategoryWindow()">Catégorie</button>
+        <button onclick="openQuizWindow()">Quiz</button>
+        <button onclick="openPlayWindow()">Jouer</button>
+        <button onclick="openResetWindow()">Réinitialiser</button>
+        <button onclick="logout()">Déconnexion</button>
     </div>
 
-    <!-- Fenêtre modale pour ajouter une question -->
-    <div id="modalQuiz" class="modal">
+    <div id="popup" class="modal">
         <div class="modal-content">
-            <h2>Ajouter une question</h2>
-            <select id="selectCategorie"></select>
-            <input type="text" id="question" placeholder="Question">
-            <input type="text" id="reponse" placeholder="Réponse">
-            <button id="ajouterQuestion">Ajouter</button>
-            <button class="fermer">Fermer</button>
-        </div>
-    </div>
-
-    <!-- Fenêtre modale pour jouer -->
-    <div id="modalJouer" class="modal">
-        <div class="modal-content">
-            <h2>Jouer</h2>
-            <select id="selectJouerCategorie"></select>
-            <button id="demarrerQuiz">Démarrer</button>
-            <button class="fermer">Fermer</button>
-        </div>
-    </div>
-
-    <!-- Fenêtre modale pour réinitialiser -->
-    <div id="modalReinitialiser" class="modal">
-        <div class="modal-content">
-            <h2>Réinitialiser</h2>
-            <button id="resetTout">Tout réinitialiser</button>
-            <select id="selectResetCategorie"></select>
-            <button id="resetCategorie">Réinitialiser la catégorie</button>
-            <button class="fermer">Fermer</button>
+            <span class="close" onclick="closePopup()">&times;</span>
+            <div id="popup-content"></div>
         </div>
     </div>
 
